@@ -1,0 +1,50 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\Background\Shell\___SHORTCUT_ID___]
+"MUIVerb"="&Add to PATH"
+"Icon"="___ICON_PATH___"
+"ExtendedSubCommandsKey"="Directory\\Background\\Shell\\___SHORTCUT_ID___\\Path"
+"ShowBasedOnVelocityId"=dword:00639bc8
+"Extended"=""
+"NoWorkingDirectory"=""
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\Shell\___SHORTCUT_ID___]
+"MUIVerb"="&Add this to PATH"
+"Icon"="___ICON_PATH___"
+"ExtendedSubCommandsKey"="Directory\\Shell\\___SHORTCUT_ID___\\Path"
+"ShowBasedOnVelocityId"=dword:00639bc8
+"Extended"=""
+"NoWorkingDirectory"=""
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\Shell\___SHORTCUT_ID___\Path\Shell\CurrentUser]
+@="U&ser"
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\Shell\___SHORTCUT_ID___\Path\Shell\CurrentUser\Command]
+@="Wscript.exe ___SCRIPT_PATH___ \"+%1\" /Path:User /Elevate"
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\Shell\___SHORTCUT_ID___\Path\Shell\System]
+@="&System"
+"HasLUAShield"=""
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\Shell\___SHORTCUT_ID___\Path\Shell\System\Command]
+@="Wscript.exe ___SCRIPT_PATH___ \"+%1\" /Path:System /Elevate"
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\Shell\___SHORTCUT_ID___.Reverse]
+"MUIVerb"="Remove from P&ATH"
+"Icon"="___ICON_PATH___"
+"AppliesTo"="System.Kind:-\"Folder\""
+"NoWorkingDirectory"=""
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\Shell\___SHORTCUT_ID___.Reverse\Command]
+@="Wscript.exe ___SCRIPT_PATH___ \"-%1\" /Path /Elevate"
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\Shell\___SHORTCUT_ID___.Reverse.Admin]
+"MUIVerb"="Remove from P&ATH"
+"Icon"="___ICON_PATH___"
+"AppliesTo"="System.Kind:-\"Folder\""
+"NoWorkingDirectory"=""
+"HasLUAShield"=""
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\Shell\___SHORTCUT_ID___.Reverse.Admin\Command]
+@="Wscript.exe ___SCRIPT_PATH___ \"-%1\" /Path /Elevate"
+
