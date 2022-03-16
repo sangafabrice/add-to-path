@@ -50,10 +50,7 @@ IsAllAllowed Array("Path", "Elevate"),_
 "Usage: set-path [-|+]PathID [/Elevate]" & vbCrLf &_
 "Usage: set-path -[FolderPath[;...]] [/Path] [/Elevate]" & vbCrLf &_
 "Usage: set-path [+][FolderPath[;...]] [/Path[:{System|User}]] [/Elevate]"
-If Named.Exists("Elevate") Then
-    ElevateCommand
-    CleanUpAndQuit(0)
-End If
+ElevateCommand("Path")
 
 '---------------------------------------------------------------------------------------------------
 PathID = Mid(CommandLineArgument, 2)
@@ -235,15 +232,16 @@ Function InPath(PathEnvVarString, PathItem)
     If InPathSize > 0 Then InPath = InPathCopy
 End Function
 
-Private Sub ElevateCommand
+Private Sub ElevateCommand(ArgumentName)
     ' Elevate the [set-path.vbs ...] command
     ' when priviledges are required
     
+    If Not Named.Exists("Elevate") Then Exit Sub
     Dim CommandLineString
     Dim FileHandle : Set FileHandle = FsoShell.OpenTextFile(TempScript, 2, True)
-    If IsPathArgSet Then
+    If Named.Exists(ArgumentName) Then
         Dim i : For i = 0 To Arguments.Length - 1
-            If UCase(Left(Arguments(i),5)) = "/PATH" Then
+            If UCase(Left(Arguments(i), Len(ArgumentName) + 1)) = "/" & UCase(ArgumentName) Then
                 CommandLineString = " " & Arguments(i)
                 Exit For
             End If
@@ -261,6 +259,7 @@ Private Sub ElevateCommand
     Set TaskInstance = Nothing
     Set SchTasks = Nothing
     Set FileHandle = Nothing
+    CleanUpAndQuit(0)
 End Sub
 
 Sub UpdateDirectoryShellObject
