@@ -304,10 +304,7 @@ Sub PathIDFirstCharIsNotPlusOrMinus
 End Sub
 
 Sub PriviledgesRequired
-    On Error Resume Next
-    Err.Clear
-    WsShell.RegRead("HKEY_USERS\S-1-5-19\Environment\TEMP")
-    If Err.Number <> 0 Then
+    If Not TestPriviledges Then
         WScript.Echo "Elevated priviledges required."
         CleanUpAndQuit(1)
     End If
@@ -367,6 +364,13 @@ End Sub
 
 
 '---------------------------------------------------------------------------------------------------
+
+Function TestPriviledges
+    On Error Resume Next
+    Err.Clear
+    WsShell.RegRead("HKEY_USERS\S-1-5-19\Environment\TEMP")
+    TestPriviledges = Err.Number = 0
+End Function
 
 Function CommandLineArgument : CommandLineArgument = UnNamed.Item(0) : End Function
 
