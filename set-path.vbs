@@ -45,6 +45,16 @@ End If
 
 '---------------------------------------------------------------------------------------------------
 InstallationRequired
+If IsResetArgSet Then
+    IsAllAllowed Array("Reset", "Elevate"),_
+    "Usage: set-path /Reset [/Elevate]"
+    ElevateCommand("Reset")
+    PathID = "___PATHID___"
+    SetPath GetRef("ResetPath")
+    CleanUpAndQuit(0)
+End If
+
+'---------------------------------------------------------------------------------------------------
 PathIDMustBeProvided
 IsAllAllowed Array("Path", "Elevate"),_
 "Usage: set-path [-|+]PathID [/Elevate]" & vbCrLf &_
@@ -138,7 +148,7 @@ Private Sub SetPath(ModificationFuntionHandle)
     IconValueName = AddToPathShellKey & PathID & "\Icon"
     Dim pathKey : For Each pathKey In GetStoredPath.Keys : ModificationFuntionHandle pathKey : Next
     UpdateDirectoryShellObject
-    If IsPathArgSet Then Exit Sub
+    If IsPathArgSet Or IsResetArgSet Then Exit Sub
     RegWriteCommand
 End Sub
 
@@ -175,6 +185,20 @@ Private Sub AddToPath(PathKey)
     WsShell.RegWrite IconValueName, IconPath
 End Sub
 
+Private Sub ResetPath(PathKey)
+    On Error Resume Next
+    Const HKCU = &H80000001
+    Dim BgVerbs
+    Action = "+"
+    GetObject("winmgmts:\\.\root\default:StdRegProv").EnumKey HKCU, Mid(AddToPathShellKey, 6), BgVerbs
+    For Each PathID In BgVerbs
+        Err.Clear
+        WsShell.RegDelete Replace(IconValueName, "___PATHID___", PathID)
+        If Err.Number = 0 Then RegWriteCommand
+    Next
+    RegWritePath GetEnvironmentKey(PathKey), CleanPath(GetStoredPath.Item(PathKey))
+End Sub 
+
 Function GetStoredPath
     ' Parse /Path argument
     ' Tokenize USERPATH/SYSTEMPATH value names when /Path is not set
@@ -186,12 +210,21 @@ Function GetStoredPath
     On Error Resume Next
     Set GetStoredPath = CreateObject("Scripting.Dictionary")
     Dim pathType
+    If IsResetArgSet Then
+        Dim arrPathType : arrPathType = Array(Named.Item("Reset"))
+        If UBound(arrPathType) = 0 And (arrPathType(0) = "" Or arrPathType(0) = "*") Then
+            arrPathType = Array("User", "System")
+        End If
+        For Each pathType In arrPathType
+            pathType = GetPathType(pathType)
+            GetStoredPath.Add pathType, WsShell.RegRead(AddToPathKey & "\" & pathType)
+        Next
+        Exit Function
+    End If
     If IsPathArgSet Then
         pathType = Named.Item("Path")
         If pathType = "" Then pathType = "User"
-        QuitIfPathArgUnknown(pathType)
-        pathType = GetValueName(pathType)
-        SetStoredPathDictionary GetStoredPath, pathType, PathID
+        SetStoredPathDictionary GetStoredPath, GetPathType(pathType), PathID
         Exit Function
     End If
     For Each pathType In Array(SYSTEMPATH_VALUENAME, USERPATH_VALUENAME)
@@ -375,13 +408,23 @@ Function TestPriviledges
     TestPriviledges = Err.Number = 0
 End Function
 
-Function CommandLineArgument : CommandLineArgument = UnNamed.Item(0) : End Function
+Function GetPathType(pathType)
+    QuitIfPathArgUnknown(pathType)
+    GetPathType = GetValueName(pathType)
+End Function
+
+Function CommandLineArgument
+    CommandLineArgument = ""
+    If UnNamed.Length <> 0 Then CommandLineArgument = UnNamed.Item(0)
+End Function
 
 Function ArgFirstChar : ArgFirstChar = Left(CommandLineArgument, 1) : End Function
 
 Function GetCommandLine(LineArgument) : GetCommandLine = ScriptPath & " " & LineArgument : End Function
 
 Function IsPathArgSet : IsPathArgSet = Named.Exists("Path") : End Function
+
+Function IsResetArgSet : IsResetArgSet = Named.Exists("Reset") : End Function
 
 Function StoredPathKey(PathType)
     StoredPathKey =  AddToPathShellKey & PathID & "\" & GetValueName(PathType)
