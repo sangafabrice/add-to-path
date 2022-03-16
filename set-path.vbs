@@ -248,8 +248,10 @@ Private Sub ElevateCommand(ArgumentName)
             End If
         Next
     End If
+    PathID = ""
+    If Not IsEmpty(CommandLineArgument) Then PathID = """""" & CommandLineArgument & """"""
     FileHandle.Write("CreateObject(""WScript.Shell"").Run """ &_
-    GetCommandLine("""""" & CommandLineArgument & """""" & NamedArgument) & """, 0, True")
+    GetCommandLine(PathID & NamedArgument) & """, 0, True")
     FileHandle.Close()
     Dim SchTasks : Set SchTasks = CreateObject("Schedule.Service")
     SchTasks.Connect()
