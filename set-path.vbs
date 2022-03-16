@@ -239,18 +239,18 @@ Private Sub ElevateCommand
     ' Elevate the [set-path.vbs ...] command
     ' when priviledges are required
     
-    Dim CommandLineString
+    Dim NamedArgument
     Dim FileHandle : Set FileHandle = FsoShell.OpenTextFile(TempScript, 2, True)
     If IsPathArgSet Then
         Dim i : For i = 0 To Arguments.Length - 1
             If UCase(Left(Arguments(i),5)) = "/PATH" Then
-                CommandLineString = " " & Arguments(i)
+                NamedArgument = " " & Arguments(i)
                 Exit For
             End If
         Next
     End If
     FileHandle.Write("CreateObject(""WScript.Shell"").Run """ &_
-    GetCommandLine("""""" & CommandLineArgument & """""" & CommandLineString) & """, 0, True")
+    GetCommandLine("""""" & CommandLineArgument & """""" & NamedArgument) & """, 0, True")
     FileHandle.Close()
     Dim SchTasks : Set SchTasks = CreateObject("Schedule.Service")
     SchTasks.Connect()
