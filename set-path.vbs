@@ -237,6 +237,7 @@ Private Sub ElevateCommand(ArgumentName)
     ' when priviledges are required
     
     If Not Named.Exists("Elevate") Then Exit Sub
+    If TestPriviledges Then Exit Sub
     Dim CommandLineString
     Dim FileHandle : Set FileHandle = FsoShell.OpenTextFile(TempScript, 2, True)
     If Named.Exists(ArgumentName) Then
