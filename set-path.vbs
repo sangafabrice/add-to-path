@@ -47,8 +47,9 @@ End If
 InstallationRequired
 PathIDMustBeProvided
 IsAllAllowed Array("Path", "Elevate"),_
-"Usage: set-path -PathID [/Path] [/Elevate]" & vbCrLf &_
-"Usage: set-path [+]PathID [/Path[:{System|User}]] [/Elevate]"
+"Usage: set-path [-|+]PathID [/Elevate]" & vbCrLf &_
+"Usage: set-path -[FolderPath[;...]] [/Path] [/Elevate]" & vbCrLf &_
+"Usage: set-path [+][FolderPath[;...]] [/Path[:{System|User}]] [/Elevate]"
 If Named.Exists("Elevate") Then
     ElevateCommand
     CleanUpAndQuit(0)
@@ -199,22 +200,20 @@ Function GetStoredPath
     For Each pathType In Array(SYSTEMPATH_VALUENAME, USERPATH_VALUENAME)
         Err.Clear
         Dim fullPath : fullPath = WsShell.RegRead(AddToPathShellKey & PathID & "\" & pathType)
-        If Err.Number = 0 Then
-            Dim indivPath : For Each indivPath In Split(fullPath, ";")
-                SetStoredPathDictionary GetStoredPath, pathType, indivPath
-            Next
-        End If
+        If Err.Number = 0 Then SetStoredPathDictionary GetStoredPath, pathType, fullPath
     Next
 End Function
 
-Sub SetStoredPathDictionary(ByRef StoredPathDico, pathType, indivPath)
-    Dim ExpandedPathArg : ExpandedPathArg = WsShell.ExpandEnvironmentStrings(indivPath)
-    If FsoShell.FolderExists(ExpandedPathArg) Then
-        Dim UnExpandedPath : Set UnExpandedPath = CreateObject("Scripting.Dictionary")
-        UnExpandedPath.Add pathType, indivPath
-        StoredPathDico.Add FsoShell.GetFolder(ExpandedPathArg).Path, UnExpandedPath
-        Set UnExpandedPath = Nothing
-    End If
+Sub SetStoredPathDictionary(ByRef StoredPathDico, pathType, fullPath)
+    Dim indivPath : For Each indivPath In Split(fullPath, ";")
+        Dim ExpandedPathArg : ExpandedPathArg = WsShell.ExpandEnvironmentStrings(indivPath)
+        If FsoShell.FolderExists(ExpandedPathArg) Then
+            Dim UnExpandedPath : Set UnExpandedPath = CreateObject("Scripting.Dictionary")
+            UnExpandedPath.Add pathType, indivPath
+            StoredPathDico.Add FsoShell.GetFolder(ExpandedPathArg).Path, UnExpandedPath
+            Set UnExpandedPath = Nothing
+        End If
+    Next
 End Sub
 
 Function InPath(PathEnvVarString, PathItem)
