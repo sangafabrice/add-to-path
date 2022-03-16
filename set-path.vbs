@@ -238,18 +238,18 @@ Private Sub ElevateCommand(ArgumentName)
     
     If Not Named.Exists("Elevate") Then Exit Sub
     If TestPriviledges Then Exit Sub
-    Dim CommandLineString
+    Dim NamedArgument
     Dim FileHandle : Set FileHandle = FsoShell.OpenTextFile(TempScript, 2, True)
     If Named.Exists(ArgumentName) Then
         Dim i : For i = 0 To Arguments.Length - 1
             If UCase(Left(Arguments(i), Len(ArgumentName) + 1)) = "/" & UCase(ArgumentName) Then
-                CommandLineString = " " & Arguments(i)
+                NamedArgument = " " & Arguments(i)
                 Exit For
             End If
         Next
     End If
     FileHandle.Write("CreateObject(""WScript.Shell"").Run """ &_
-    GetCommandLine("""""" & CommandLineArgument & """""" & CommandLineString) & """, 0, True")
+    GetCommandLine("""""" & CommandLineArgument & """""" & NamedArgument) & """, 0, True")
     FileHandle.Close()
     Dim SchTasks : Set SchTasks = CreateObject("Schedule.Service")
     SchTasks.Connect()
