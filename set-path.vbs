@@ -91,10 +91,12 @@ Private Sub InstallMenu
     Dim TempReg : TempReg = ScriptDir & "\set_path_setup_temp.reg"
     Dim ReadHandle : Set ReadHandle = FsoShell.OpenTextFile(ScriptDir & "\set-path-setup.reg", 1)
     Dim WriteHandle : Set WriteHandle = FsoShell.OpenTextFile(TempReg, 2, True)
-    WriteHandle.Write(Replace(Replace(Replace(ReadHandle.ReadAll(),_
+    WriteHandle.Write(Replace(Replace(Replace(Replace(Replace(ReadHandle.ReadAll(),_
     "___ICON_PATH___", EscapeSlashChar(ScriptDir & "\set-path-main.ico")),_
     "___SHORTCUT_ID___", ShortcutID),_
-    "___SCRIPT_PATH___", EscapeSlashChar(ScriptPath)))
+    "___SCRIPT_PATH___", EscapeSlashChar(ScriptPath)),_
+    "___USER_ENV_PATH___", USERPATH_VALUENAME),_
+    "___SYSTEM_ENV_PATH___", SYSTEMPATH_VALUENAME))
     ReadHandle.Close()
     WriteHandle.Close()
     Dim ObjExec : Set ObjExec = WsShell.Exec("Reg Import " & TempReg & " /Reg:64")
@@ -191,10 +193,13 @@ Private Sub ResetPath(PathKey)
     Dim BgVerbs
     Action = "+"
     GetObject("winmgmts:\\.\root\default:StdRegProv").EnumKey HKCU, Mid(AddToPathShellKey, 6), BgVerbs
-    For Each PathID In BgVerbs
-        Err.Clear
-        WsShell.RegDelete Replace(IconValueName, "___PATHID___", PathID)
-        If Err.Number = 0 Then RegWriteCommand
+    Dim dotPathID : For Each dotPathID In BgVerbs
+        If Left(dotPathID, 1) = "." Then
+            PathID = Mid(dotPathID, 2)
+            Err.Clear
+            WsShell.RegDelete Replace(IconValueName, "___PATHID___", PathID)
+            If Err.Number = 0 Then RegWriteCommand
+        End If
     Next
     RegWritePath GetEnvironmentKey(PathKey), CleanPath(GetStoredPath.Item(PathKey))
 End Sub 
@@ -469,12 +474,13 @@ End Function
 Sub RegWritePath(EnvKey, PathString) : WsShell.RegWrite EnvKey, PathString, "REG_EXPAND_SZ" : End Sub
 
 Sub RegWriteCommand
+    WsShell.RegWrite PathIDKey & "\", PathID
     WsShell.RegWrite PathIDKey & "\Command\", "Wscript.exe " &_
     GetCommandLine(Action & PathID) & " /Elevate"
 End Sub
 
 Function PathIDKey
-    PathIDKey = AddToPathShellKey & PathID
+    PathIDKey = AddToPathShellKey & "." & PathID
 End Function
 
 Function GetValueName(PathType) : GetValueName = UCase(PathType) & "PATH" : End Function

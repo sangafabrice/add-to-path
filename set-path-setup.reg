@@ -7,8 +7,8 @@ Windows Registry Editor Version 5.00
 "ShowBasedOnVelocityId"=dword:00639bc8
 "Extended"=""
 "NoWorkingDirectory"=""
-"USERPATH"="%USERPROFILE%\\AppData\\Local\\Microsoft\\WindowsApps"
-"SYSTEMPATH"="%SystemRoot%\\system32;%SystemRoot%;%SystemRoot%\\System32\\Wbem;%SYSTEMROOT%\\System32\\WindowsPowerShell\\v1.0;%SYSTEMROOT%\\System32\\OpenSSH"
+"___USER_ENV_PATH___"="%USERPROFILE%\\AppData\\Local\\Microsoft\\WindowsApps"
+"___SYSTEM_ENV_PATH___"="%SystemRoot%\\system32;%SystemRoot%;%SystemRoot%\\System32\\Wbem;%SYSTEMROOT%\\System32\\WindowsPowerShell\\v1.0;%SYSTEMROOT%\\System32\\OpenSSH"
 
 [HKEY_CURRENT_USER\SOFTWARE\Classes\Directory\Shell\___SHORTCUT_ID___]
 "MUIVerb"="&Add this to PATH"
