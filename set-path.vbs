@@ -147,7 +147,7 @@ Private Sub SetPath(ModificationFuntionHandle)
     ' Check/Uncheck PathID in directory background
     ' Switch verbs between "Remove/Add to Path"
 
-    IconValueName = AddToPathShellKey & PathID & "\Icon"
+    IconValueName = PathIDKey & "\Icon"
     Dim pathKey : For Each pathKey In GetStoredPath.Keys : ModificationFuntionHandle pathKey : Next
     UpdateDirectoryShellObject
     If IsPathArgSet Or IsResetArgSet Then Exit Sub
@@ -193,10 +193,13 @@ Private Sub ResetPath(PathKey)
     Dim BgVerbs
     Action = "+"
     GetObject("winmgmts:\\.\root\default:StdRegProv").EnumKey HKCU, Mid(AddToPathShellKey, 6), BgVerbs
-    For Each PathID In BgVerbs
-        Err.Clear
-        WsShell.RegDelete Replace(IconValueName, "___PATHID___", PathID)
-        If Err.Number = 0 Then RegWriteCommand
+    Dim dotPathID : For Each dotPathID In BgVerbs
+        If Left(dotPathID, 1) = "." Then
+            PathID = Mid(dotPathID, 2)
+            Err.Clear
+            WsShell.RegDelete Replace(IconValueName, "___PATHID___", PathID)
+            If Err.Number = 0 Then RegWriteCommand
+        End If
     Next
     RegWritePath GetEnvironmentKey(PathKey), CleanPath(GetStoredPath.Item(PathKey))
 End Sub 
@@ -231,7 +234,7 @@ Function GetStoredPath
     End If
     For Each pathType In Array(SYSTEMPATH_VALUENAME, USERPATH_VALUENAME)
         Err.Clear
-        Dim fullPath : fullPath = WsShell.RegRead(AddToPathShellKey & PathID & "\" & pathType)
+        Dim fullPath : fullPath = WsShell.RegRead(PathIDKey & "\" & pathType)
         If Err.Number = 0 Then SetStoredPathDictionary GetStoredPath, pathType, fullPath
     Next
 End Function
@@ -429,7 +432,7 @@ Function IsPathArgSet : IsPathArgSet = Named.Exists("Path") : End Function
 Function IsResetArgSet : IsResetArgSet = Named.Exists("Reset") : End Function
 
 Function StoredPathKey(PathType)
-    StoredPathKey =  AddToPathShellKey & PathID & "\" & GetValueName(PathType)
+    StoredPathKey =  PathIDKey & "\" & GetValueName(PathType)
 End Function
 
 Function EscapeSlashChar(PathString) : EscapeSlashChar = Replace(PathString, "\", "\\") : End Function
@@ -471,9 +474,14 @@ End Function
 Sub RegWritePath(EnvKey, PathString) : WsShell.RegWrite EnvKey, PathString, "REG_EXPAND_SZ" : End Sub
 
 Sub RegWriteCommand
-    WsShell.RegWrite AddToPathShellKey & PathID & "\Command\", "Wscript.exe " &_
+    WsShell.RegWrite PathIDKey & "\", PathID
+    WsShell.RegWrite PathIDKey & "\Command\", "Wscript.exe " &_
     GetCommandLine(Action & PathID) & " /Elevate"
 End Sub
+
+Function PathIDKey
+    PathIDKey = AddToPathShellKey & "." & PathID
+End Function
 
 Function GetValueName(PathType) : GetValueName = UCase(PathType) & "PATH" : End Function
 
