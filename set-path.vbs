@@ -91,10 +91,12 @@ Private Sub InstallMenu
     Dim TempReg : TempReg = ScriptDir & "\set_path_setup_temp.reg"
     Dim ReadHandle : Set ReadHandle = FsoShell.OpenTextFile(ScriptDir & "\set-path-setup.reg", 1)
     Dim WriteHandle : Set WriteHandle = FsoShell.OpenTextFile(TempReg, 2, True)
-    WriteHandle.Write(Replace(Replace(Replace(ReadHandle.ReadAll(),_
+    WriteHandle.Write(Replace(Replace(Replace(Replace(Replace(ReadHandle.ReadAll(),_
     "___ICON_PATH___", EscapeSlashChar(ScriptDir & "\set-path-main.ico")),_
     "___SHORTCUT_ID___", ShortcutID),_
-    "___SCRIPT_PATH___", EscapeSlashChar(ScriptPath)))
+    "___SCRIPT_PATH___", EscapeSlashChar(ScriptPath)),_
+    "___USER_ENV_PATH___", USERPATH_VALUENAME),_
+    "___SYSTEM_ENV_PATH___", SYSTEMPATH_VALUENAME))
     ReadHandle.Close()
     WriteHandle.Close()
     Dim ObjExec : Set ObjExec = WsShell.Exec("Reg Import " & TempReg & " /Reg:64")
