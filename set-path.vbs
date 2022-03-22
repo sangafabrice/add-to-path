@@ -83,7 +83,7 @@ CleanUpAndQuit(0)
 
 '***************************************************************************************************
 
-Private Sub InstallMenu
+Public Sub InstallMenu
     ' Implement shortcut menu verbs:
     ' On directory background - "Add to PATH"
     ' On directory object - "Add this to PATH"
@@ -110,7 +110,7 @@ Private Sub InstallMenu
     Set WriteHandle = Nothing
 End Sub
 
-Private Sub InstallPathID
+Public Sub InstallPathID
     ' Implement a Path ID shortcut submenu verb
     ' on directory background - "Add to PATH"
 
@@ -141,7 +141,7 @@ Private Sub InstallPathID
     Set KeyList = Nothing
 End Sub
 
-Private Sub SetPath(ModificationFuntionHandle)
+Public Sub SetPath(ModificationFuntionHandle)
     ' Modify Path Environment Variable
     ' Change UI accordingly:
     ' Check/Uncheck PathID in directory background
@@ -154,7 +154,7 @@ Private Sub SetPath(ModificationFuntionHandle)
     RegWriteCommand
 End Sub
 
-Private Sub RemoveFromPath(PathKey)
+Public Sub RemoveFromPath(PathKey)
     On Error Resume Next
     Dim PathEnvValueName : For Each PathEnvValueName In Array(_
         USERENVPATH_VALUENAME, SYSTEMENVPATH_VALUENAME)
@@ -167,7 +167,7 @@ Private Sub RemoveFromPath(PathKey)
     WsShell.RegDelete IconValueName
 End Sub
 
-Private Sub AddToPath(PathKey)
+Public Sub AddToPath(PathKey)
     Dim PathKeyDict : Set PathKeyDict = GetStoredPath.Item(PathKey)
     Dim PathEnvType : PathEnvType = Join(PathKeyDict.Keys)
     Dim PathEnvValueName : PathEnvValueName = GetEnvironmentKey(PathEnvType)
@@ -187,7 +187,7 @@ Private Sub AddToPath(PathKey)
     WsShell.RegWrite IconValueName, IconPath
 End Sub
 
-Private Sub ResetPath(PathKey)
+Public Sub ResetPath(PathKey)
     On Error Resume Next
     Const HKCU = &H80000001
     Dim BgVerbs
@@ -204,7 +204,7 @@ Private Sub ResetPath(PathKey)
     RegWritePath GetEnvironmentKey(PathKey), CleanPath(GetStoredPath.Item(PathKey))
 End Sub 
 
-Function GetStoredPath
+Private Function GetStoredPath
     ' Parse /Path argument
     ' Tokenize USERPATH/SYSTEMPATH value names when /Path is not set
     ' Store directory path tokens in dictionary:
@@ -239,7 +239,7 @@ Function GetStoredPath
     Next
 End Function
 
-Sub SetStoredPathDictionary(ByRef StoredPathDico, pathType, fullPath)
+Private Sub SetStoredPathDictionary(ByRef StoredPathDico, pathType, fullPath)
     Dim indivPath : For Each indivPath In Split(fullPath, ";")
         Dim ExpandedPathArg : ExpandedPathArg = WsShell.ExpandEnvironmentStrings(indivPath)
         If FsoShell.FolderExists(ExpandedPathArg) Then
@@ -251,7 +251,7 @@ Sub SetStoredPathDictionary(ByRef StoredPathDico, pathType, fullPath)
     Next
 End Sub
 
-Function InPath(PathEnvVarString, PathItem)
+Private Function InPath(PathEnvVarString, PathItem)
     ' Find the positions of a folder path
     ' in PATH environment variable
 
@@ -303,7 +303,7 @@ Private Sub ElevateCommand(ArgumentName)
     CleanUpAndQuit(0)
 End Sub
 
-Sub UpdateDirectoryShellObject
+Private Sub UpdateDirectoryShellObject
     ' Update AppliesTo values with Parsed Paths
     ' that are the set of folders from which menus can display
     ' AND-AQS helps exclude folders : menu option hidden
@@ -322,7 +322,7 @@ End Sub
 
 '***************************************************************************************************
 
-Sub IsAllAllowed(AllowedParameterList, UsageMessage)
+Private Sub IsAllAllowed(AllowedParameterList, UsageMessage)
     Dim AllowedParameters : Set AllowedParameters = CreateObject("Scripting.Dictionary")
     Dim paramName
     For Each paramName In AllowedParameterList : AllowedParameters.Add UCase(paramName), "" : Next
@@ -337,21 +337,21 @@ Sub IsAllAllowed(AllowedParameterList, UsageMessage)
     Set AllowedParameters = Nothing
 End Sub
 
-Sub PathIDFirstCharIsNotPlusOrMinus
+Private Sub PathIDFirstCharIsNotPlusOrMinus
     If InStr("+-", ArgFirstChar) > 0 Then
         WScript.Echo ArgFirstChar & " unexpected."
         CleanUpAndQuit(1)
     End If
 End Sub
 
-Sub PriviledgesRequired
+Private Sub PriviledgesRequired
     If Not TestPriviledges Then
         WScript.Echo "Elevated priviledges required."
         CleanUpAndQuit(1)
     End If
 End Sub
 
-Sub UserOrSystemMustBeSpecifiedAndNotEmpty
+Private Sub UserOrSystemMustBeSpecifiedAndNotEmpty
     Dim Counter : Counter = 0
     Dim pName : For Each pName In Named
         If LCase(pName) <> "install" And Named(pName) = "" Then
@@ -364,7 +364,7 @@ Sub UserOrSystemMustBeSpecifiedAndNotEmpty
     Next
 End Sub
 
-Sub InstallationRequired
+Private Sub InstallationRequired
     On Error Resume Next
     Err.Clear
     WsShell.RegRead(AddToPathKey & "\")
@@ -379,7 +379,7 @@ Sub InstallationRequired
     End If
 End Sub
 
-Sub PathMustExist(PathArg, ByRef ExpandedPathArg)
+Private Sub PathMustExist(PathArg, ByRef ExpandedPathArg)
     ExpandedPathArg = WsShell.ExpandEnvironmentStrings(PathArg)
     If Not FsoShell.FolderExists(ExpandedPathArg) Then
         WScript.Echo PathArg & " cannot be found."
@@ -387,7 +387,7 @@ Sub PathMustExist(PathArg, ByRef ExpandedPathArg)
     End If
 End Sub
 
-Sub PathIDMustBeProvided
+Private Sub PathIDMustBeProvided
     If UnNamed.Length <> 1 Then CleanUpAndQuit(1)
 End Sub
 
@@ -406,36 +406,40 @@ End Sub
 
 '---------------------------------------------------------------------------------------------------
 
-Function TestPriviledges
+Private Function TestPriviledges
     On Error Resume Next
     Err.Clear
     WsShell.RegRead("HKEY_USERS\S-1-5-19\Environment\TEMP")
     TestPriviledges = Err.Number = 0
 End Function
 
-Function GetPathType(pathType)
+Private Function GetPathType(pathType)
     QuitIfPathArgUnknown(pathType)
     GetPathType = GetValueName(pathType)
 End Function
 
-Function CommandLineArgument
+Private Function CommandLineArgument
     CommandLineArgument = ""
     If UnNamed.Length <> 0 Then CommandLineArgument = UnNamed.Item(0)
 End Function
 
-Function ArgFirstChar : ArgFirstChar = Left(CommandLineArgument, 1) : End Function
+Private Function ArgFirstChar : ArgFirstChar = Left(CommandLineArgument, 1) : End Function
 
-Function GetCommandLine(LineArgument) : GetCommandLine = ScriptPath & " " & LineArgument : End Function
+Private Function GetCommandLine(LineArgument)
+    GetCommandLine = ScriptPath & " " & LineArgument
+End Function
 
-Function IsPathArgSet : IsPathArgSet = Named.Exists("Path") : End Function
+Private Function IsPathArgSet : IsPathArgSet = Named.Exists("Path") : End Function
 
-Function IsResetArgSet : IsResetArgSet = Named.Exists("Reset") : End Function
+Private Function IsResetArgSet : IsResetArgSet = Named.Exists("Reset") : End Function
 
-Function StoredPathKey(PathType)
+Private Function StoredPathKey(PathType)
     StoredPathKey =  PathIDKey & "\" & GetValueName(PathType)
 End Function
 
-Function EscapeSlashChar(PathString) : EscapeSlashChar = Replace(PathString, "\", "\\") : End Function
+Private Function EscapeSlashChar(PathString)
+    EscapeSlashChar = Replace(PathString, "\", "\\")
+End Function
 
 Private Function CleanPath(PathValue)
     strCleanPath PathValue, ";"
@@ -443,49 +447,51 @@ Private Function CleanPath(PathValue)
     CleanPath = PathValue
 End Function
 
-Sub strCleanPath(PathValue, delimiter)
+Private Sub strCleanPath(PathValue, delimiter)
     PathValue = Replace(PathValue, delimiter & ";", ";")
     If Right(PathValue, 1) = delimiter Then PathValue = Left(PathValue, Len(PathValue) - 1)
 End Sub
 
-Function GetPathEnv(ENVPATH_VALUENAME)
+Private Function GetPathEnv(ENVPATH_VALUENAME)
     On Error Resume Next
     GetPathEnv = CleanPath(WsShell.RegRead(ENVPATH_VALUENAME))
 End Function
 
-Function GetEnvironmentKey(PathValueName)
+Private Function GetEnvironmentKey(PathValueName)
     Select Case PathValueName
         Case USERPATH_VALUENAME : GetEnvironmentKey = USERENVPATH_VALUENAME
         Case SYSTEMPATH_VALUENAME : GetEnvironmentKey = SYSTEMENVPATH_VALUENAME
     End Select
 End Function
 
-Sub UpdateAppliesToKey(DirVerbKey, UserPathsAQS, SystemPathsAQS)
+Private Sub UpdateAppliesToKey(DirVerbKey, UserPathsAQS, SystemPathsAQS)
     WsShell.RegWrite DirVerbKey & "\AppliesTo", UserPathsAQS & " AND " & SystemPathsAQS
 End Sub
 
-Function ParseCanonicalAQS(PathString, LogicalOperator)
+Private Function ParseCanonicalAQS(PathString, LogicalOperator)
     Dim AqsSign : AqsSign = "System.ItemPathDisplay:" & "-" & """"
     If LogicalOperator = "OR" Then AqsSign = Replace(AqsSign, "-", "")
     ParseCanonicalAQS = AqsSign & Replace(WsShell.ExpandEnvironmentStrings(PathString),_
     ";", """ " & LogicalOperator & " " & AqsSign) & """"
 End Function
 
-Sub RegWritePath(EnvKey, PathString) : WsShell.RegWrite EnvKey, PathString, "REG_EXPAND_SZ" : End Sub
+Private Sub RegWritePath(EnvKey, PathString)
+    WsShell.RegWrite EnvKey, PathString, "REG_EXPAND_SZ"
+End Sub
 
-Sub RegWriteCommand
+Private Sub RegWriteCommand
     WsShell.RegWrite PathIDKey & "\", PathID
     WsShell.RegWrite PathIDKey & "\Command\", "Wscript.exe " &_
     GetCommandLine(Action & PathID) & " /Elevate"
 End Sub
 
-Function PathIDKey
+Private Function PathIDKey
     PathIDKey = AddToPathShellKey & "." & PathID
 End Function
 
-Function GetValueName(PathType) : GetValueName = UCase(PathType) & "PATH" : End Function
+Private Function GetValueName(PathType) : GetValueName = UCase(PathType) & "PATH" : End Function
 
-Sub CleanUp
+Private Sub CleanUp
     On Error Resume Next
     Set WsShell = Nothing
     Set FsoShell = Nothing
@@ -494,7 +500,7 @@ Sub CleanUp
     Set Arguments = Nothing
 End Sub
 
-Sub CleanUpAndQuit(ExitCode)
+Private Sub CleanUpAndQuit(ExitCode)
     CleanUp
     WScript.Quit(ExitCode)
 End Sub
