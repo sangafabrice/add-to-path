@@ -7,7 +7,7 @@ Dim FsoShell : Set FsoShell = CreateObject("Scripting.FileSystemObject")
 Dim ScriptPath : ScriptPath = WScript.ScriptFullName
 Dim ScriptDir : ScriptDir = FsoShell.GetParentFolderName(ScriptPath)
 Dim TempScript : TempScript = ScriptDir & "\set_path_temp.vbs"
-Dim IconPath : IconPath = ScriptDir & "\set-path-check.ico"
+Dim IconPath : IconPath = ScriptDir & "\check.ico"
 Const ShortcutID = "AddToPath"
 Const USERENVPATH_VALUENAME = "HKCU\Environment\Path"
 Const SYSTEMENVPATH_VALUENAME = "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\Path"
@@ -89,10 +89,10 @@ Public Sub InstallMenu
     ' On directory object - "Add this to PATH"
 
     Dim TempReg : TempReg = ScriptDir & "\set_path_setup_temp.reg"
-    Dim ReadHandle : Set ReadHandle = FsoShell.OpenTextFile(ScriptDir & "\set-path-setup.reg", 1)
+    Dim ReadHandle : Set ReadHandle = FsoShell.OpenTextFile(ScriptDir & "\setup.reg", 1)
     Dim WriteHandle : Set WriteHandle = FsoShell.OpenTextFile(TempReg, 2, True)
     WriteHandle.Write(Replace(Replace(Replace(Replace(Replace(ReadHandle.ReadAll(),_
-    "___ICON_PATH___", EscapeSlashChar(ScriptDir & "\set-path-main.ico")),_
+    "___ICON_PATH___", EscapeSlashChar(ScriptDir & "\main.ico")),_
     "___SHORTCUT_ID___", ShortcutID),_
     "___SCRIPT_PATH___", EscapeSlashChar(ScriptPath)),_
     "___USER_ENV_PATH___", USERPATH_VALUENAME),_
